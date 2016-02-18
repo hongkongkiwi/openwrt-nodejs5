@@ -27,6 +27,13 @@ menu "Select NodeJS Options"
     prompt "Enable gdb debugging support"
     default n
 
+  config NODEJS_CREATE_SYMLINKS
+    bool
+    prompt "Create symlinks for node/npm"
+    help
+      By default nodejs installs using a version number to avoid conflicts e.g. node4. If this option is selected, a symlink for node and npm will point to node4 and npm4
+    default y
+
   menu "Shared Libraries"
     comment "Select Shared Libraries"	
 

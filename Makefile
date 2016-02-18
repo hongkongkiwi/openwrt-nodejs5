@@ -7,12 +7,14 @@ include $(TOPDIR)/rules.mk
 # Name and release number of this package
 PKG_NAME:=nodejs5
 PKG_VERSION:=v5.6.0
-PKG_RELEASE:=0
+PKG_RELEASE:=1
+
+PKG_NPM_NAME:="npmjs5"
 
 PKG_SOURCE:=node-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://nodejs.org/dist/$(PKG_VERSION)/
-PKG_MD5SUM:=b1287c356e904954da7e0c6435ff9948
-PKG_MAINTAINER:=Andy Savage
+PKG_MD5SUM:=6f7c2cec289a20bcd970240dd63c1395
+PKG_MAINTAINER:=Andy Savage <andy@savage.hk>
 
 PKG_INSTALL:=0
 
@@ -20,26 +22,29 @@ PKG_BUILD_DIR:=$(BUILD_DIR)/node-$(PKG_VERSION)
 PKG_INSTALL_DIR:=$(PKG_BUILD_DIR)/ipkg-install
 
 # These are the binary names assigned, using version so we don't conflict
-NPM_NAME:="npm5"
-NODE_NAME:="node5"
+NPM_BIN_NAME:="npm5"
+NODE_BIN_NAME:="node5"
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/${PKG_NAME}
+define Package/${PKG_NAME}/Default
 	SECTION:=utils
 	CATEGORY:=Utilities
 	TITLE:=nodejs5.
 	DEPENDS:=+libpthread +librt +libstdcpp
 	MENU:=1
+endef
 
+define Package/${PKG_NAME}
+  $(call Package/${PKG_NAME}/Default)
   ifeq ($(CONFIG_NODEJS_WITH_SSL),y) && ($(CONFIG_NODEJS_SHARED_OPENSSL),y)
-	DEPENDS += +libopenssl
+    DEPENDS += +libopenssl
   endif
   ifeq ($(CONFIG_NODEJS_SHARED_ZLIB),y)
-	DEPENDS += +zlib
+    DEPENDS += +zlib
   endif
   ifeq ($(CONFIG_NODEJS_SHARED_LIBUV),y)
-        DEPENDS += +libuv
+    DEPENDS += +libuv
   endif
   ifeq ($(CONFIG_NODEJS_SHARED_HTTP_PARSER),y)
         DEPENDS += +libhttp-parser
@@ -47,10 +52,21 @@ define Package/${PKG_NAME}
 
 endef
 
+define Package/${PKG_NPM_NAME}
+        SECTION:=utils
+        CATEGORY:=Utilities
+        TITLE:=npmjs5.
+        DEPENDS:=+nodejs5
+        MENU:=1
+endef
+
 define Package/${PKG_NAME}/description
   Node.js® is a JavaScript runtime built on Chrome's V8 JavaScript engine. Node.js uses
-  an event-driven, non-blocking I/O model that makes it lightweight and efficient. Node.js'
-   package ecosystem, npm, is the largest ecosystem of open source libraries in the world.
+  an event-driven, non-blocking I/O model that makes it lightweight and efficient.
+endef
+
+define Package/${PKG_NPM_NAME}/description
+  NPM (for Node.js), is the largest ecosystem of open source libraries in the world.
 endef
 
 CPU:=$(subst x86_64,x64,$(subst i386,ia32,$(ARCH)))
@@ -62,7 +78,7 @@ CONFIG_NODEJS_SHARED_OPENSSL:=y
 CONFIG_NODEJS_WITH_SSL:=y
 CONFIG_NODEJS_BUILD_WITH_NPM:=y
 
-define Package/${PKG_NAME}/config
+define Package/config
 	source "$(SOURCE)/Config.in"
 endef
 
@@ -117,14 +133,6 @@ ifneq ($(CONFIG_NODEJS_V8_OPTIONS),)
 	CONFIGURE_ARGS += --v8-options="$(CONFIG_NODEJS_V8_OPTIONS)"
 endif
 
-#ifeq ($(CPU),mipsel)
-#  CONFIGURE_ARGS += \
-#	--with-mips-arch-variant=r2 --with-mips-fpu-mode=fp32
-#else ifeq ($(CPU),arm)
-#  CONFIGURE_ARGS += \
-#	--with-arm-fpu=vfp
-#endif
-
 # Configure Additional CPU Type Options
 ifneq ($(CONFIG_NODEJS_CPU_TYPE_DEFAULT),y)
   ifeq ($(CONFIG_NODEJS_CPU_TYPE_MIPS),y)
@@ -172,19 +180,24 @@ ifneq ($(CONFIG_NODEJS_CPU_TYPE_DEFAULT),y)
 endif
 
 define Package/$(PKG_NAME)/install
-	mkdir -p $(1)/usr/bin
-
-  ifeq ($(CONFIG_NODEJS_BUILD_WITH_NPM),y)
-	mkdir -p $(1)/usr/lib/node_modules/${NPM_NAME}/{bin,lib,node_modules}
-	$(CP) $(PKG_INSTALL_DIR)/usr/bin/npm $(1)/usr/bin/${NPM_NAME}
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/node_modules/npm/{package.json,LICENSE,cli.js} $(1)/usr/lib/node_modules/${NPM_NAME}
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/node_modules/npm/bin/npm-cli.js $(1)/usr/lib/node_modules/${NPM_NAME}/bin
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/node_modules/npm/lib/* $(1)/usr/lib/node_modules/${NPM_NAME}/lib/
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/node_modules/npm/node_modules/* $(1)/usr/lib/node_modules/${NPM_NAME}/node_modules/
-	ln -s $(1)/usr/bin/${NPME_NAME} $(1)/usr/bin/npm
+  mkdir -p $(1)/usr/bin
+  $(CP) $(PKG_INSTALL_DIR)/usr/bin/node $(1)/usr/bin/${NODE_NAME}
+  ifeq ($(CONFIG_NODEJS_CREATE_SYMLINKS),y)
+    ln -s $(1)/usr/bin/${NODE_NAME} $(1)/usr/bin/node
   endif
-	$(CP) $(PKG_INSTALL_DIR)/usr/bin/node $(1)/usr/bin/${NODE_NAME}
-        ln -s $(1)/usr/bin/${NODE_NAME} $(1)/usr/bin/node
+endef
+
+define Package/$(PKG_NPM_NAME)/install
+  mkdir -p $(1)/usr/bin
+  mkdir -p $(1)/usr/lib/node_modules/${NPM_NAME}/{bin,lib,node_modules}
+  $(CP) $(PKG_INSTALL_DIR)/usr/bin/npm $(1)/usr/bin/${NPM_NAME}
+  $(CP) $(PKG_INSTALL_DIR)/usr/lib/node_modules/npm/{package.json,LICENSE,cli.js} $(1)/usr/lib/n$
+  $(CP) $(PKG_INSTALL_DIR)/usr/lib/node_modules/npm/bin/npm-cli.js $(1)/usr/lib/node_modules/${N$
+  $(CP) $(PKG_INSTALL_DIR)/usr/lib/node_modules/npm/lib/* $(1)/usr/lib/node_modules/${NPM_NAME}/$
+  $(CP) $(PKG_INSTALL_DIR)/usr/lib/node_modules/npm/node_modules/* $(1)/usr/lib/node_modules/${N$
+  ifeq ($(CONFIG_NODEJS_CREATE_SYMLINKS),y)
+    ln -s $(1)/usr/bin/${NPME_NAME} $(1)/usr/bin/npm
+  endif
 endef
 
 # build a package.
