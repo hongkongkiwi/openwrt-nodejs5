@@ -1,0 +1,167 @@
+# NodeJS configuration
+menu "Select NodeJS Options"
+  comment "NodeJS compilation options."	
+  depends on PACKAGE_nodejs
+    
+  config NODEJS_CONFIGURE_BUILD_WITH_NPM
+    bool
+    prompt "Build with NPM"
+    help 
+      NPM allows you to install packages from the internet.
+    default y
+
+  config NODEJS_WITH_SSL
+    bool
+    prompt "Enable OpenSSL"
+    help 
+      Build including support for OpenSSL
+    default y
+
+  config NODEJS_DEBUG_BUILD_ENABLED
+    bool 
+    prompt "Enable debug build"
+    default n
+
+  config NODEJS_GDB_SUPPORT_ENABLED
+    bool 
+    prompt "Enable gdb debugging support"
+    default n
+
+  menu "Shared Libraries"
+    comment "Select Shared Libraries"	
+
+    config NODEJS_SHARED_OPENSSL
+      depends on NODEJS_WITH_SSL  
+      bool 
+      prompt "Use Shared openssl"
+      help 
+        Whether to use shared or statically compiled openssl
+      default y
+      
+      config NODEJS_SHARED_ZLIB
+        bool 
+        prompt "Use Shared zlib"
+        help 
+          Whether to use shared or statically compiled zlib
+        default y
+
+      config NODEJS_SHARED_LIBUV
+        bool 
+        prompt "Use Shared libuv"
+        help 
+          Whether to use shared or statically compiled libuv
+        default n
+
+      config NODEJS_SHARED_HTTP_PARSER
+        bool 
+        prompt "Use Shared http_parser"
+        help 
+          Whether to use shared or statically compiled http_parser
+        default n
+  endmenu
+      
+  choice
+    prompt "Advanced CPU Options"
+    default NODEJS_CPU_TYPE_DEFAULT
+
+    config NODEJS_CPU_TYPE_DEFAULT
+      bool "default (no extra options)"
+
+    config NODEJS_CPU_TYPE_ARM
+      bool "arm"
+
+    config NODEJS_CPU_TYPE_MIPS
+      bool "mips"
+  endchoice
+
+  choice 
+    depends on NODEJS_CPU_TYPE_ARM && !NODEJS_CPU_TYPE_DEFAULT
+    prompt "Arm FPU Type"
+    default NODEJS_FPU_ARM_USE_NONE
+    
+    config NODEJS_FPU_ARM_USE_NONE
+      bool "No FPU support"
+
+    config NODEJS_FPU_ARM_USE_VFP
+      bool "vfp"
+
+    config NODEJS_FPU_ARM_USE_VFPV3
+      bool "vfpv3"
+
+    config NODEJS_FPU_ARM_USE_VFPV3_D16
+      bool "vfpv3-d16"
+
+    config NODEJS_FPU_ARM_USE_NEON
+      bool "neon"      
+  endchoice
+
+  choice 
+    depends on NODEJS_CPU_TYPE_MIPS && !NODEJS_CPU_TYPE_DEFAULT
+    prompt "Mips FPU Type"
+    default NODEJS_FPU_MIPS_FP32
+    
+    config NODEJS_FPU_MIPS_FP32
+      bool "fp32"
+
+    config NODEJS_FPU_MIPS_FP64
+      bool "fp64"
+
+    config NODEJS_FPU_MIPS_FPXX
+      bool "fpxx"   
+    endchoice
+
+  choice 
+    depends on NODEJS_CPU_TYPE_ARM && !NODEJS_CPU_TYPE_DEFAULT
+    prompt "Arm floating-point ABI"
+    default NODEJS_ABI_ARM_TYPE_HARD
+    
+    config NODEJS_ABI_ARM_TYPE_SOFT
+      bool "soft"
+
+    config NODEJS_ABI_ARM_TYPE_SOFTFP
+      bool "softfp"
+
+    config NODEJS_ABI_ARM_TYPE_HARD
+      bool "hard"   
+  endchoice
+
+  choice 
+    depends on NODEJS_CPU_TYPE_MIPS && !NODEJS_CPU_TYPE_DEFAULT
+    prompt "Mips floating-point ABI"
+    default NODEJS_ABI_MIPS_TYPE_HARD
+    
+    config NODEJS_ABI_MIPS_TYPE_SOFT
+      bool "soft"
+
+    config NODEJS_ABI_MIPS_TYPE_HARD
+      bool "hard"   
+  endchoice
+
+  choice 
+    depends on NODEJS_CPU_TYPE_MIPS && !NODEJS_CPU_TYPE_DEFAULT
+    prompt "Mips Arch Variant"
+    default NODEJS_MIPS_ARCH_VARIANT_R2
+    
+    config NODEJS_MIPS_ARCH_VARIANT_LOONSON
+      bool "loongson"
+
+    config NODEJS_MIPS_ARCH_VARIANT_R1
+      bool "r1"
+      
+    config NODEJS_MIPS_ARCH_VARIANT_R2
+      bool "r2"
+      
+    config NODEJS_MIPS_ARCH_VARIANT_R6
+      bool "r6"
+      
+    config NODEJS_MIPS_ARCH_VARIANT_RX
+      bool "rx"
+  endchoice
+  
+  config NODEJS_V8_OPTIONS
+    string 
+    prompt "V8 Engine Options"
+    default ""
+    
+endmenu
+
