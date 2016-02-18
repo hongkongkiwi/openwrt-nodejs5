@@ -174,15 +174,17 @@ endif
 define Package/$(PKG_NAME)/install
 	mkdir -p $(1)/usr/bin
 
-ifeq ($(CONFIG_NODEJS_BUILD_WITH_NPM),y)
+  ifeq ($(CONFIG_NODEJS_BUILD_WITH_NPM),y)
 	mkdir -p $(1)/usr/lib/node_modules/${NPM_NAME}/{bin,lib,node_modules}
 	$(CP) $(PKG_INSTALL_DIR)/usr/bin/npm $(1)/usr/bin/${NPM_NAME}
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/node_modules/npm/{package.json,LICENSE,cli.js} $(1)/usr/lib/node_modules/${NPM_NAME}
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/node_modules/npm/bin/npm-cli.js $(1)/usr/lib/node_modules/${NPM_NAME}/bin
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/node_modules/npm/lib/* $(1)/usr/lib/node_modules/${NPM_NAME}/lib/
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/node_modules/npm/node_modules/* $(1)/usr/lib/node_modules/${NPM_NAME}/node_modules/
-endif
+	ln -s $(1)/usr/bin/${NPME_NAME} $(1)/usr/bin/npm
+  endif
 	$(CP) $(PKG_INSTALL_DIR)/usr/bin/node $(1)/usr/bin/${NODE_NAME}
+        ln -s $(1)/usr/bin/${NODE_NAME} $(1)/usr/bin/node
 endef
 
 # build a package.
