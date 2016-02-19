@@ -1,15 +1,8 @@
 # NodeJS configuration
 menu "Select NodeJS Options"
+  depends on PACKAGE_nodejs5
   comment "NodeJS compilation options."	
-  depends on PACKAGE_nodejs
     
-  config NODEJS_CONFIGURE_BUILD_WITH_NPM
-    bool
-    prompt "Build with NPM"
-    help 
-      NPM allows you to install packages from the internet.
-    default y
-
   config NODEJS_WITH_SSL
     bool
     prompt "Enable OpenSSL"
